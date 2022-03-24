@@ -95,4 +95,27 @@ def send_email(data):
 		server.sendmail(sender_email, receiver_email, message)
 
 
-print()
+# check if garbage day
+def check_garbage_day(data):
+	today = datetime.date.today()
+	if today == data['day']:
+		return data['type']
+
+	# get the diff in days and find if odd or even week
+	diff = (((today - data['day']).days / 7) % 2)
+
+	# if even, same type
+	if diff == 0:
+		data['day'] = today
+		return data['type']
+
+	# if odd, change type
+	if diff == 1:
+		data['day'] = today
+
+		# change type accordingly
+		if data['type'] == 'Both Recycle & Waste':
+			data['type'] = 'Waste Only'
+		else:
+			data['type'] = 'Both Recycle & Waste'
+		return data['type']
