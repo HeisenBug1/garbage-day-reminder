@@ -113,7 +113,6 @@ def send_email(garbage, msg):
 		server.login(sender_email, password)
 		server.sendmail(sender_email, receiver_email, message)
 
-
 # check if garbage day
 def check_garbage_day(garbage):
 	today = datetime.date.today()
@@ -140,14 +139,19 @@ def check_garbage_day(garbage):
 
 	# if not today or tomorrow
 	else:
-		next_garbage_day = garbage['day'] + datetime.timedelta(weeks=1)
-		msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
+		if garbage['day'].day > today.day:
+			msg = "Next garbage day is: "+garbage['day'].strftime("%A, %B %d, %Y")+"\n"
+			msg += garbage['type']
 
-		# find NEXT garbage day TYPE
-		if garbage['type'] == 'Waste Only':
-			msg += 'Both Recycle & Waste'
 		else:
-			msg += 'Waste Only'
+			next_garbage_day = garbage['day'] + datetime.timedelta(weeks=1)
+			msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
+
+			# find NEXT garbage day TYPE
+			if garbage['type'] == 'Waste Only':
+				msg += 'Both Recycle & Waste'
+			else:
+				msg += 'Waste Only'
 
 		return msg
 
