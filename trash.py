@@ -2,7 +2,7 @@ import datetime, pickle, sys
 
 
 # if running script for the first time
-# gather all necessary data
+# gather all necessary garbage
 def first_run():
 	import re	# RegEx
 
@@ -52,7 +52,7 @@ def first_run():
 		password = input('Password: ')
 		receiver = input('Recipient: ')
 
-		data = {
+		garbage = {
 			"day": day,
 			"type": garbage_type,
 			"sender": sender,
@@ -61,16 +61,16 @@ def first_run():
 		}
 
 		with open('trash_data.pkl', 'wb') as file:
-			pickle.dump(data, file)
+			pickle.dump(garbage, file)
 
-		return data
+		return garbage
 
 	else:
 		print('Interactive shell not found')
 		return None
 
 
-# check if data exists
+# check if garbage data exists
 def initialize():
 	try:
 		with open('trash_data.pkl', 'rb') as file:
@@ -81,14 +81,14 @@ def initialize():
 
 
 # notify user about current email
-def send_email(data, msg):
+def send_email(garbage, msg):
 	import smtplib, ssl
 
 	port = 465  # For SSL
 	smtp_server = "smtp.gmail.com"
-	sender_email = data['sender']  # Enter your address
-	receiver_email = data['receiver']  # Enter receiver address
-	password = data['password']
+	sender_email = garbage['sender']  # Enter your address
+	receiver_email = garbage['receiver']  # Enter receiver address
+	password = garbage['password']
 	if 'Subject:' in msg:
 		message = msg
 	else:
@@ -101,58 +101,48 @@ def send_email(data, msg):
 
 
 # check if garbage day
-def check_garbage_day(data):
+def check_garbage_day(garbage):
 	today = datetime.date.today()
-	if today == data['day']:
-		return ("Today: "+data['type'])
 
-	# update date in data if older > 7 days
-	delta_days = (today - data['day']).days
-	if delta_days > 7:
-		day_diff = abs(today.isoweekday() - data['day'].isoweekday())
-		data['day'] = (data['day'] + datetime.timedelta(days=(delta_days-day_diff)))
+	# update garbage DAY based on weeks past since last
+	delta_weeks = today.isocalendar()[1] - garbage['day'].isocalendar()[1]
+	garbage['day'] = garbage['day'] + datetime.timedelta(weeks=delta_weeks)
 
-	score = (delta_days / 7) % 2
-
-	# change type accordingly
-	if score >= 1:
-		if data['type'] == 'Both Recycle & Waste':
-			data['type'] = 'Waste Only'
+	# update garbage TYPE based on odd/even weeks past
+	score = delta_weeks % 2
+	if score >= 1:	# change (no change if < 1)
+		if garbage['type'] == 'Both Recycle & Waste':
+			garbage['type'] = 'Waste Only'
 		else:
-			data['type'] = 'Both Recycle & Waste'
+			garbage['type'] = 'Both Recycle & Waste'
 
-	# if today and even = same type
-	if score == 0:
-		data['day'] = today
-		return ("Today: "+data['type'])
+	# if today
+	if garbage['day'] == today:
+		return ("Today: "+garbage['type'])
 
-	# if today and odd = change type
-	if score == 1:
-		data['day'] = today
-		return ("Today: "+data['type'])
+	# if tomorrow
+	if garbage['day'] == today + datetime.timedelta(days=1):
+		return ("Tomorrow: "+garbage['type'])
 
-	# if not today
+	# if not today or tomorrow
 	else:
-		next_garbage_day = data['day'] + datetime.timedelta(days=7)
-		delta = (next_garbage_day - today).days
-	
-		if delta == 1:
-			msg = "Tomorrow: "
-		else:
-			msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
+		next_garbage_day = garbage['day'] + datetime.timedelta(weeks=1)
+		msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
 
-		if data['type'] == 'Waste Only':
+		# find NEXT garbage day TYPE
+		if garbage['type'] == 'Waste Only':
 			msg += 'Both Recycle & Waste'
 		else:
 			msg += 'Waste Only'
+
 		return msg
 
 
 # run
-data = initialize()
-if data is not None:
-	msg = check_garbage_day(data)
+garbage = initialize()
+if garbage is not None:
+	msg = check_garbage_day(garbage)
 	if sys.stdout.isatty() is True:
 		print(msg)
 	else:
-		send_email(data, msg)
+		send_email(garbage, msg)
