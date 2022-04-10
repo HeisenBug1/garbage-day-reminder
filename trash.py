@@ -1,4 +1,5 @@
-import datetime, pickle, sys
+import datetime, pickle, sys, os
+from pathlib import Path
 
 
 # if running script for the first time
@@ -11,40 +12,49 @@ def first_run():
 	if sys.stdout.isatty() is True:
 		while True:
 			while True:
+
 				day = input('Type "Today", "Tomorrow", "Yesterday" or MM-DD (Month-Day)\nEnter: ').lower()
 				match = re.search("^([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$", day)
 				
 				if'tod' in day:
 					day = datetime.date.today()
 					break
+
 				elif 'tom' in day:
 					day = datetime.date.today() + datetime.timedelta(days=1)
 					break
+
 				elif 'yes' in day:
 					day = datetime.date.today() - datetime.timedelta(days=1)
 					break
+
 				elif match is not None:
 					day = day.split("-")
 					day[0] = int(day[0])
 					day[1] = int(day[1])
 					day = datetime.date(int(datetime.date.today().strftime("%Y")), day[0], day[1])
 					break
+
 				else:
 					print("\tWrong entry: "+day+"\n\tPlease try again\n")
 
 			if 'y' in input("Is "+day.strftime("%A, %b-%d")+" correct? (yes/no) ").lower():
 				break
+
 			else:
 				print("\tThen please try again\n")
 
 		while True:		
 			garbage_type = input("Was it Recycle Only? or both Recycle & Waste?\nType 'waste' or 'both': ").lower()
+
 			if 'both' in garbage_type:
 				garbage_type = 'Both Recycle & Waste'
 				break
+
 			elif 'was' in garbage_type:
 				garbage_type = 'Waste Only'
 				break
+
 			else:
 				print("\tWrong entry: "+garbage_type+"\n\tPlease try again\n")
 
@@ -60,7 +70,10 @@ def first_run():
 			"receiver": receiver 
 		}
 
-		with open('trash_data.pkl', 'wb') as file:
+		configFile = str(Path.home())+'/GarbageReminder/trash_data.pkl'
+		os.makedirs(os.path.dirname(configFile), exist_ok=True)
+
+		with open(configFile, 'wb') as file:
 			pickle.dump(garbage, file)
 
 		return garbage
@@ -73,7 +86,8 @@ def first_run():
 # check if garbage data exists
 def initialize():
 	try:
-		with open('trash_data.pkl', 'rb') as file:
+		configFile = str(Path.home())+'/GarbageReminder/trash_data.pkl'
+		with open(configFile, 'rb') as file:
 			return pickle.load(file)
 	except:
 		print('No datafile found')
