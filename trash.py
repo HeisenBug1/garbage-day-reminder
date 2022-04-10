@@ -139,7 +139,7 @@ def check_garbage_day(garbage):
 
 	# if not today or tomorrow
 	else:
-		if garbage['day'].day > today.day:
+		if garbage['day'] > today:
 			msg = "Next garbage day is: "+garbage['day'].strftime("%A, %B %d, %Y")+"\n"
 			msg += garbage['type']
 
