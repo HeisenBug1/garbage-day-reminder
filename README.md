@@ -1,9 +1,9 @@
 # Garbage Day Reminder
- send an email notification to yourself of which garbage bin to take out during your garbage day week
+ Remind yourself of what garbage to take out to the curb
 
 ## About
 
-If you don't live in an appartment, then you most likely have to take out your own garbage to the curbe for the sanitation department to pick it up once every week. and what garbage you can put outside depends. it usually alternated between Waste only or Both Waste and Recycle. and if your like me who forgets which one it is during that week, then this little python script can be helpful to you. it's also very helpful for people who came back from a long vacation and can't remember.
+If you don't live in an appartment, then you most likely have to take out your own garbage to the curb for the sanitation department to pick it up once every week. and what garbage you can put outside depends. it usually alternated between Waste only or Both Waste and Recycle. and if your like me who forgets which one it is during that week, then this little python script can be helpful to you. it's also very helpful for people who came back from a long vacation and can't remember.
 
 just run the script, and it will ask you what day your last garbage was and what type. it'll save that info in your home directory and with that bit of information it can tell you accurately for the rest of the year guaranteed.
 
