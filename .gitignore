@@ -1,2 +1,7 @@
 
 *.pkl
+bin
+include
+lib*
+share
+*.cfg
