@@ -1,4 +1,6 @@
-import datetime, pickle, sys, os
+#!/usr/bin/python3
+
+import datetime, pickle, sys, os, subprocess
 from pathlib import Path
 
 
@@ -156,11 +158,38 @@ def check_garbage_day(garbage):
 		return msg
 
 
+# NOT USING (UNDER TESTING)
+# function to check if desktop enviroment is present
+# def is_desktop():
+    
+# 	# The command you want to execute   
+# 	cmd = 'echo'
+# 	temp = subprocess.Popen([cmd, '$DESKTOP_SESSION'], stdout = subprocess.PIPE)
+# 	output = str(temp.communicate())
+# 	print(output)
+# 	# return output
+
+
 # run
+# is_desktop()
 garbage = initialize()
 if garbage is not None:
 	msg = check_garbage_day(garbage)
 	if sys.stdout.isatty() is True:
-		print(msg)
+		try:
+			import PySimpleGUI as sg
+			print(msg)
+			layout = [[sg.Text(msg)], [sg.Button("OK")]]
+			window = sg.Window("Garbage Day Reminder", layout)
+			# Create an event loop
+			while True:
+				event, values = window.read()
+				# End program if user closes window or
+				# presses the OK button
+				if event == "OK" or event == sg.WIN_CLOSED:
+					break
+			window.close()
+		except ModuleNotFoundError:
+			print(msg)
 	else:
 		send_email(garbage, msg)
