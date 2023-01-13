@@ -119,6 +119,11 @@ def send_email(garbage, msg):
 def check_garbage_day(garbage):
 	today = datetime.date.today()
 
+	# update year if changed (prevent calc error of 52 weeks/year)
+	year_diff = today.year - garbage['day'].year
+	if year_diff > 0:
+		garbage['day'] = garbage['day'] + datetime.timedelta(weeks=52*year_diff)
+
 	# update garbage DAY based on weeks past since last
 	delta_weeks = today.isocalendar()[1] - garbage['day'].isocalendar()[1]
 	garbage['day'] = garbage['day'] + datetime.timedelta(weeks=delta_weeks)
