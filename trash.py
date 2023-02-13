@@ -2,6 +2,7 @@
 
 import datetime, pickle, sys, os
 from pathlib import Path
+from json import dumps
 
 
 # if running script for the first time
@@ -116,7 +117,7 @@ def send_email(garbage, msg):
 		server.sendmail(sender_email, receiver_email, message)
 
 # check if garbage day
-def check_garbage_day(garbage):
+def check_garbage_day(garbage, api=False):
 	today = datetime.date.today()
 
 	# update year if changed (prevent calc error of 52 weeks/year)
@@ -138,29 +139,56 @@ def check_garbage_day(garbage):
 
 	# if today
 	if garbage['day'] == today:
-		return ("Today: "+garbage['type'])
+		if not api:
+			return ("Today: "+garbage['type'])
 
 	# if tomorrow
 	if garbage['day'] == today + datetime.timedelta(days=1):
-		return ("Tomorrow: "+garbage['type'])
+		if not api:
+			return ("Tomorrow: "+garbage['type'])
 
 	# if not today or tomorrow
 	else:
+		if api:
+			api_return = {}
 		if garbage['day'] > today:
-			msg = "Next garbage day is: "+garbage['day'].strftime("%A, %B %d, %Y")+"\n"
-			msg += garbage['type']
+			if api:
+				api_return['date'] = garbage['day']
+				api_return['type'] = garbage['type']
+			else:
+				msg = "Next garbage day is: "+garbage['day'].strftime("%A, %B %d, %Y")+"\n"
+				msg += garbage['type']
 
 		else:
 			next_garbage_day = garbage['day'] + datetime.timedelta(weeks=1)
-			msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
+			if api:
+				api_return['date'] = next_garbage_day
+			else:
+				msg = "Next garbage day is: "+next_garbage_day.strftime("%A, %B %d, %Y")+"\n"
 
 			# find NEXT garbage day TYPE
 			if garbage['type'] == 'Waste Only':
-				msg += 'Both Recycle & Waste'
+				if api:
+					api_return['type'] = 'Both Recycle & Waste'
+				else:
+					msg += 'Both Recycle & Waste'
 			else:
-				msg += 'Waste Only'
+				if api:
+					api_return['type'] = 'Waste Only'
+				else:
+					msg += 'Waste Only'
+		if api:
+			api_return['date'] = dumps(api_return['date'], default=json_serial)
+			return api_return
+		else:
+			return msg
 
-		return msg
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 # NOT USING (UNDER TESTING)
@@ -177,24 +205,25 @@ def check_garbage_day(garbage):
 
 # run
 # is_desktop()
-garbage = initialize()
-if garbage is not None:
-	msg = check_garbage_day(garbage)
-	if sys.stdout.isatty() is True:
-		try:
-			import PySimpleGUI as sg
-			print(msg)
-			layout = [[sg.Text(msg)], [sg.Button("OK")]]
-			window = sg.Window("Garbage Day Reminder", layout)
-			# Create an event loop
-			while True:
-				event, values = window.read()
-				# End program if user closes window or
-				# presses the OK button
-				if event == "OK" or event == sg.WIN_CLOSED:
-					break
-			window.close()
-		except ModuleNotFoundError:
-			print(msg)
-	else:
-		send_email(garbage, msg)
+if __name__ == '__main__':
+	garbage = initialize()
+	if garbage is not None:
+		msg = check_garbage_day(garbage)
+		if sys.stdout.isatty() is True:
+			try:
+				import PySimpleGUI as sg
+				print(msg)
+				layout = [[sg.Text(msg)], [sg.Button("OK")]]
+				window = sg.Window("Garbage Day Reminder", layout)
+				# Create an event loop
+				while True:
+					event, values = window.read()
+					# End program if user closes window or
+					# presses the OK button
+					if event == "OK" or event == sg.WIN_CLOSED:
+						break
+				window.close()
+			except ModuleNotFoundError:
+				print(msg)
+		else:
+			send_email(garbage, msg)
