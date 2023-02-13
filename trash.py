@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime, pickle, sys, os, subprocess
+import datetime, pickle, sys, os
 from pathlib import Path
 
 
