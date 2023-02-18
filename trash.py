@@ -2,7 +2,6 @@
 
 import datetime, pickle, sys, os
 from pathlib import Path
-from json import dumps
 
 
 # if running script for the first time
