@@ -178,17 +178,9 @@ def check_garbage_day(garbage, api=False):
 				else:
 					msg += 'Waste Only'
 		if api:
-			api_return['date'] = dumps(api_return['date'], default=json_serial)
 			return api_return
 		else:
 			return msg
-
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 # NOT USING (UNDER TESTING)
