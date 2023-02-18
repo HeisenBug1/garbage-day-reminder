@@ -7,6 +7,9 @@ share
 *.cfg
 test.py
 
+# all Mac OS hidden junk files
+._*
+
 
 # from git ignore collection
 
