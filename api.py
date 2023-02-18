@@ -1,19 +1,15 @@
-from fastapi import FastAPI
-from pathlib import Path
-import pickle, sys
-
+from fastapi import FastAPI, Response, status
 import trash
 
-# Check data file is present
-# data = None
-# try:
-#     configFile = str(Path.home())+'/GarbageReminder/trash_data.pkl'
-#     with open(configFile, 'rb') as file:
-#         data = pickle.load(file)
-# except:
-#     print('No datafile found')
-#     sys.exit(1)
+app = FastAPI()
 
-garbage = trash.initialize()
-garbage = trash.check_garbage_day(garbage, api=True)
-print(garbage)
+@app.get("/garbage", status_code=status.HTTP_200_OK)
+async def get_garbage_date(response: Response):
+    garbage = trash.initialize(api=True)
+    if garbage is None:
+        response.status_code = status.HTTP_204_NO_CONTENT
+        garbage = "Garbage data not found. Run trash.py in terminal first."
+    else:
+        garbage = trash.check_garbage_day(garbage, api=True)
+    
+    return garbage
