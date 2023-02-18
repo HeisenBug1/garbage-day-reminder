@@ -87,14 +87,17 @@ def first_run():
 
 
 # check if garbage data exists
-def initialize():
+def initialize(api=False):
 	try:
 		configFile = str(Path.home())+'/GarbageReminder/trash_data.pkl'
 		with open(configFile, 'rb') as file:
 			return pickle.load(file)
 	except:
 		print('No datafile found')
-		return first_run()
+		if api:
+			return None
+		else:
+			return first_run()
 
 
 # notify user about current email
