@@ -139,20 +139,30 @@ def check_garbage_day(garbage, api=False):
 		else:
 			garbage['type'] = 'Both Recycle & Waste'
 
+	# variable to return
+	if api:
+		api_return = {}
+	else:
+		msg = ""
+
 	# if today
 	if garbage['day'] == today:
-		if not api:
-			return ("Today: "+garbage['type'])
+		if api:
+			api_return['date'] = garbage['day']
+			api_return['type'] = garbage['type']
+		else:
+			msg = "Today: "+garbage['type']
 
 	# if tomorrow
-	if garbage['day'] == today + datetime.timedelta(days=1):
-		if not api:
-			return ("Tomorrow: "+garbage['type'])
+	elif garbage['day'] == today + datetime.timedelta(days=1):
+		if api:
+			api_return['date'] = garbage['day']
+			api_return['type'] = garbage['type']
+		else:
+			msg = "Tomorrow: "+garbage['type']
 
 	# if not today or tomorrow
 	else:
-		if api:
-			api_return = {}
 		if garbage['day'] > today:
 			if api:
 				api_return['date'] = garbage['day']
@@ -179,10 +189,12 @@ def check_garbage_day(garbage, api=False):
 					api_return['type'] = 'Waste Only'
 				else:
 					msg += 'Waste Only'
-		if api:
-			return api_return
-		else:
-			return msg
+
+	# return here
+	if api:
+		return api_return
+	else:
+		return msg
 
 
 # NOT USING (UNDER TESTING)
