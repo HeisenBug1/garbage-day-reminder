@@ -124,9 +124,8 @@ def check_garbage_day(garbage, api=False):
 
 	# update year if changed (prevent calc error of 52 weeks/year)
 	year_diff = today.year - garbage['day'].year
-	while year_diff > 0:
+	if year_diff > 0:
 		garbage['day'] = garbage['day'] + datetime.timedelta(weeks=52*year_diff)
-		year_diff = year_diff - 1
 
 	# update garbage DAY based on weeks past since last
 	delta_weeks = today.isocalendar()[1] - garbage['day'].isocalendar()[1]
